@@ -29,8 +29,6 @@
 
 
 
-require_once(PATH_t3lib.'class.t3lib_extobjbase.php');
-
 class tx_groupmngr_modfunc1 extends t3lib_extobjbase {
 
 	/**
