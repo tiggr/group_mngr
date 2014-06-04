@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<T3locallang>
+	<meta type="array">
+		<type>database</type>
+		<description>Language labels for database tables/fields belonging to extension 'group_mngr'</description>
+	</meta>
+	<data type="array">
+		<languageKey index="default" type="array">
+			<label index="moduleFunction.tx_groupmngr_modfunc1">View by Group</label>
+                        <label index="fe_groups.tx_groupmngr_manager">Group Manager(s)</label>
+		</languageKey>
+	</data>
+</T3locallang>
