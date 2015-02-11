@@ -26,7 +26,6 @@ $tempColumns = Array (
 );
 
 
-t3lib_div::loadTCA("fe_groups");
 t3lib_extMgm::addTCAcolumns("fe_groups",$tempColumns,1);
 t3lib_extMgm::addToAllTCAtypes("fe_groups","tx_groupmngr_manager;;;;1-1-1");
 ?>
