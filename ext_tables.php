@@ -2,10 +2,10 @@
 if (!defined ('TYPO3_MODE')) 	die ('Access denied.');
 
 if (TYPO3_MODE=="BE")	{
-	t3lib_extMgm::insertModuleFunction(
+	\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::insertModuleFunction(
 		"web_info",
 		"tx_groupmngr_modfunc1",
-		t3lib_extMgm::extPath($_EXTKEY)."modfunc1/class.tx_groupmngr_modfunc1.php",
+		\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath($_EXTKEY)."modfunc1/class.tx_groupmngr_modfunc1.php",
 		"LLL:EXT:group_mngr/locallang_db.xml:moduleFunction.tx_groupmngr_modfunc1"
 	);
 }
@@ -26,6 +26,6 @@ $tempColumns = Array (
 );
 
 
-t3lib_extMgm::addTCAcolumns("fe_groups",$tempColumns,1);
-t3lib_extMgm::addToAllTCAtypes("fe_groups","tx_groupmngr_manager;;;;1-1-1");
+\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns("fe_groups",$tempColumns,1);
+\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addToAllTCAtypes("fe_groups","tx_groupmngr_manager;;;;1-1-1");
 ?>
