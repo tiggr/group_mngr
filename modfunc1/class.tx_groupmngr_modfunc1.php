@@ -21,6 +21,11 @@
 *
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
+use TYPO3\CMS\Backend\Module\AbstractFunctionModule;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Imaging\IconFactory;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 /**
  * Module extension (addition to function menu) 'View by Group' for the 'group_mngr' extension.
  *
@@ -29,7 +34,11 @@
 
 
 
-class tx_groupmngr_modfunc1 extends t3lib_extobjbase {
+class tx_groupmngr_modfunc1 extends AbstractFunctionModule {
+
+
+    /** @var  IconFactory */
+    protected $iconFactory;
 
 	/**
 	 * Returns the module menu
@@ -55,29 +64,30 @@ class tx_groupmngr_modfunc1 extends t3lib_extobjbase {
 			// Initializes the module. Done in this function because we may need to re-initialize if data is submitted!
 		global $SOBE,$BE_USER,$LANG,$BACK_PATH,$TCA_DESCR,$TCA,$CLIENT,$TYPO3_CONF_VARS;
 
-		$this->id = t3lib_div::_GP('id');       // Page Id.. irrelevant
-		$this->mode   = (t3lib_div::_GP('mode')) ? t3lib_div::_GP('mode') : 'fe';   // BE/FE view mode
-        $groupId  = t3lib_div::_GP('groupId');  // FE/BE Group uid
-        $action   = t3lib_div::_GP('action');   // Actions...
+		$this->id = GeneralUtility::_GP('id');       // Page Id.. irrelevant
+		$this->mode   = (GeneralUtility::_GP('mode')) ? GeneralUtility::_GP('mode') : 'fe';   // BE/FE view mode
+        $groupId  = GeneralUtility::_GP('groupId');  // FE/BE Group uid
+        $action   = GeneralUtility::_GP('action');   // Actions...
 
+        $this->iconFactory = GeneralUtility::makeInstance(IconFactory::class);
 
         if($action) {
 
             switch($action) {
                 case 'add':
-                    if(!is_array(t3lib_div::_GP('groupIds'))) {
+                    if(!is_array(GeneralUtility::_GP('groupIds'))) {
                         $this->message = 'ERROR: No Group(s) selected<br />';
                     }
-                    elseif(!t3lib_div::_GP('usernames')) {
+                    elseif(!GeneralUtility::_GP('usernames')) {
                         $this->message = 'ERROR: Please enter one or more usernames<br />';
                     }
                     else {
-                        $this->addUsersToGroups(t3lib_div::_GP('usernames'), t3lib_div::_GP('groupIds'));
+                        $this->addUsersToGroups(GeneralUtility::_GP('usernames'), GeneralUtility::_GP('groupIds'));
                     }
                     break;
                 case 'remove':
 
-                    if($username = $this->removeUserFromGroup($groupId, t3lib_div::_GP('userId'))) {
+                    if($username = $this->removeUserFromGroup($groupId, GeneralUtility::_GP('userId'))) {
                         $this->message.= 'Updated groups for \''.$username.'\' successfully<br />';
                     }
                     else {
@@ -123,7 +133,7 @@ class tx_groupmngr_modfunc1 extends t3lib_extobjbase {
                     $output.= '<form name="add_to_groups" method="post" action="index.php">
                                    <p>To add multiple users seperate userbanes with a comma like so: user1,user2,user3</p>
                                    <strong><label for="usernames">Username(s): </label></strong>
-                                   <input type="text" name="usernames" id="usernames"'.(t3lib_div::_GP('usernames') ? ' value="'.t3lib_div::_GP('usernames').'"' : '').' />
+                                   <input type="text" name="usernames" id="usernames"'.(GeneralUtility::_GP('usernames') ? ' value="'.GeneralUtility::_GP('usernames').'"' : '').' />
                                    <input type="hidden" name="id" value="'.$this->id.'" />
                                    <input type="hidden" name="action" value="add" />
                                    <input type="submit" name="submit" value="Add User(s) to Group(s)" />
@@ -142,7 +152,7 @@ class tx_groupmngr_modfunc1 extends t3lib_extobjbase {
                     // Back link.
                 $altText = 'Go back';
                 $output.= '<br /><a href="index.php?id='.$this->id.'&amp;mode='.$this->mode.'">
-                           <img'.t3lib_iconWorks::skinImg($BACK_PATH, 'gfx/goback.gif').'alt="'.$altText.'" title="'.$altText.'" />
+                           <img'.IconFactory::skinImg($BACK_PATH, 'gfx/goback.gif').'alt="'.$altText.'" title="'.$altText.'" />
                            <strong>Go Back</strong></a><br />';
             }
         }
@@ -182,20 +192,20 @@ class tx_groupmngr_modfunc1 extends t3lib_extobjbase {
                         $checkbox='';
                     }
 
-    	        	$icon = t3lib_iconWorks::getIconImage($this->mode.'_groups', $group, $BACK_PATH, 'alt="uid: '.$group['uid'].'" title="uid: '.$group['uid'].'"');
+    	        	$icon = $this->iconFactory->getIconForRecord($this->mode.'_groups', $group);
     	        	$groupName = $group['title'];
 
                         // Edit group
                     if($BE_USER->isAdmin()) {
                         $altText = 'Edit';
-        	        	$actions.= '<a href="#" onclick="'.t3lib_BEfunc::editOnClick('&edit['.$this->mode.'_groups]['.$group['uid'].']=edit', $BACK_PATH).'">';
-        	        	$actions.= '<img'.t3lib_iconWorks::skinImg($BACK_PATH, 'gfx/edit2.gif').'alt="'.$altText.'" title="'.$altText.'" /></a>';
+        	        	$actions.= '<a href="#" onclick="'.BackendUtility::editOnClick('&edit['.$this->mode.'_groups]['.$group['uid'].']=edit', $BACK_PATH).'">';
+        	        	$actions.= '<img'.$this->iconFactory->getIcon('actions-document-open').'alt="'.$altText.'" title="'.$altText.'" /></a>';
                     }
 
                         // List group members
                     $altText = 'View Members of this group('.$group['title'].')';
                     $actions.= '<a href="index.php?id='.$this->id.'&amp;mode='.$this->mode.'&amp;groupId='.$group['uid'].'">';
-    	        	$actions.= '<img'.t3lib_iconWorks::skinImg($BACK_PATH, 'gfx/list.gif').'alt="'.$altText.'" title="'.$altText.'" /></a>';
+    	        	$actions.= '<img'.$this->iconFactory->getIcon('actions-system-list-open').'alt="'.$altText.'" title="'.$altText.'" /></a>';
 
                         // Allow some extendability...
     	        	if(function_exists('additionalGroupActions')) {
@@ -228,7 +238,7 @@ class tx_groupmngr_modfunc1 extends t3lib_extobjbase {
         global $BACK_PATH, $BE_USER;
 
             // Get group record and its members.
-        $group = t3lib_BEfunc::getRecord($this->mode.'_groups', $groupId, '*');
+        $group = BackendUtility::getRecord($this->mode.'_groups', $groupId, '*');
 	    $members = $this->getMembersOfGroup($groupId, $this->mode);
 
 	    if(is_array($members)) {
@@ -239,22 +249,22 @@ class tx_groupmngr_modfunc1 extends t3lib_extobjbase {
                 // Loop through members array.
             foreach($members as $uid) {
                 $actions = '';
-                $user = t3lib_BEfunc::getRecord($this->mode.'_users', $uid, '*');
+                $user = BackendUtility::getRecord($this->mode.'_users', $uid, '*');
 
-                $icon = t3lib_iconWorks::getIconImage($this->mode.'_users', $user, $BACK_PATH, 'alt="uid: '.$user['uid'].'" title="uid: '.$user['uid'].'"');
+                $icon = $this->iconFactory->getIconForRecord($this->mode.'_users', $user);
 
                     // Edit user.
                 if($BE_USER->isAdmin()) {
                     $altText = 'Edit';
-                	$actions.= '<a href="#" onclick="'.t3lib_BEfunc::editOnClick('&edit['.$this->mode.'_users]['.$user['uid'].']=edit', $BACK_PATH).'">';
-                	$actions.= '<img'.t3lib_iconWorks::skinImg($BACK_PATH, 'gfx/edit2.gif').'alt="'.$altText.'" title="'.$altText.'" /></a>';
+                	$actions.= '<a href="#" onclick="'.BackendUtility::editOnClick('&edit['.$this->mode.'_users]['.$user['uid'].']=edit', $BACK_PATH).'">';
+                	$actions.= '<img'.IconFactory::skinImg($BACK_PATH, 'gfx/edit2.gif').'alt="'.$altText.'" title="'.$altText.'" /></a>';
                 }
 
             	   // Remove user from group.
                 if($this->mode=='fe' && $this->allowedToMngGroup($group)) {
                     $altText = 'Remove \''.$user['username'].'\' from \''.$group['title'].'\'';
                     $actions.= '<a href="index.php?id='.$this->id.'&amp;mode='.$this->mode.'&amp;groupId='.$groupId.'&amp;action=remove&userId='.$user['uid'].'">';
-                	$actions.= '<img'.t3lib_iconWorks::skinImg($BACK_PATH, 'gfx/garbage.gif').'alt="'.$altText.'" title="'.$altText.'" /></a>';
+                	$actions.= '<img'.IconFactory::skinImg($BACK_PATH, 'gfx/garbage.gif').'alt="'.$altText.'" title="'.$altText.'" /></a>';
                 }
 
             	  // Allow some extendability...
@@ -318,18 +328,18 @@ class tx_groupmngr_modfunc1 extends t3lib_extobjbase {
 	function addUsersToGroups($usernames, $groupIds) {
 	    global $TYPO3_DB;
 
-        $usernames = t3lib_div::trimExplode(',', $usernames);
+        $usernames = GeneralUtility::trimExplode(',', $usernames);
 
         foreach($usernames as $username) {
 
-            $user = t3lib_BEfunc::getRecordRaw('fe_users', "username='".$TYPO3_DB->quoteStr($username, 'fe_users')."'");
+            $user = BackendUtility::getRecordRaw('fe_users', "username='".$TYPO3_DB->quoteStr($username, 'fe_users')."'");
 
             if(is_array($user)) {
 
                 $usergroup = $user['usergroup'];
 
                 foreach($groupIds as $groupId) {
-                    $group = t3lib_BEfunc::getRecord('fe_groups', $groupId, 'title,tx_groupmngr_manager');
+                    $group = BackendUtility::getRecord('fe_groups', $groupId, 'title,tx_groupmngr_manager');
 
                     if($this->allowedToMngGroup($group, true)) {
                         if($this->inList($usergroup, $groupId)) {
@@ -372,11 +382,11 @@ class tx_groupmngr_modfunc1 extends t3lib_extobjbase {
 	function removeUserFromGroup($groupId, $userId) {
         global $TYPO3_DB;
 
-	    $group = t3lib_BEfunc::getRecord('fe_groups', intval($groupId));
+	    $group = BackendUtility::getRecord('fe_groups', intval($groupId));
 
 	    if($this->allowedToMngGroup($group)) {
-	        $user = t3lib_BEfunc::getRecord('fe_users', $userId);
-	        $usergroups = t3lib_div::trimExplode(',', $user['usergroup']);
+	        $user = BackendUtility::getRecord('fe_users', $userId);
+	        $usergroups = GeneralUtility::trimExplode(',', $user['usergroup']);
 
 	        foreach($usergroups as $group) if($group!=$groupId)    $array[] = $group;
 	        $usergroups = (is_array($array)) ? implode(',', $array) : '';

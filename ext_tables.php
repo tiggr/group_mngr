@@ -26,6 +26,6 @@ $tempColumns = Array (
 );
 
 
-\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns("fe_groups",$tempColumns,1);
+\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns("fe_groups",$tempColumns);
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addToAllTCAtypes("fe_groups","tx_groupmngr_manager;;;;1-1-1");
 ?>
